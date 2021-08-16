@@ -39,7 +39,7 @@ class SecurityConfig {
             .pathMatchers(HttpMethod.GET, "/api/profiles/**").permitAll()
             .pathMatchers(HttpMethod.GET, "/api/articles/**").permitAll()
             .pathMatchers(HttpMethod.GET, "/api/tags/**").permitAll()
-            .anyExchange().authenticated();
+            .anyExchange().authenticated()
     }
 
     private fun AuthorizeExchangeSpec.applyConfig(config: EndpointsSecurityConfig) = config.apply(this)

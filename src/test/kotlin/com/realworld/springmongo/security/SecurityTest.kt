@@ -25,7 +25,7 @@ internal class SecurityTest(
 ) {
 
     @Test
-    fun shouldReturn201() {
+    fun `should return 201`() {
         val status = client.get()
             .uri("/permitAll")
             .exchange()
@@ -36,7 +36,7 @@ internal class SecurityTest(
     }
 
     @Test
-    fun shouldReturn401() {
+    fun `should return 401`() {
         val status = client.get()
             .uri("/authenticated")
             .exchange()
@@ -47,7 +47,7 @@ internal class SecurityTest(
     }
 
     @Test
-    fun shouldReturnUserId() {
+    fun `should return user id`() {
         val userId = "1"
         val token = signer.generateToken(userId)
         val result = client.get()
