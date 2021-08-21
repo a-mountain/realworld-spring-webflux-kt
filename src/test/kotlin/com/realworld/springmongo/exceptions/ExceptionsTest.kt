@@ -24,7 +24,7 @@ import javax.validation.constraints.NotBlank
 )
 @Import(LocaleConfigurer::class, ExceptionsTest.Controller::class)
 internal class ExceptionsTest(
-    @Autowired val client: WebTestClient
+    @Autowired val client: WebTestClient,
 ) {
 
     @Test
@@ -82,9 +82,9 @@ internal class ExceptionsTest(
     }
 
     data class TestDto(
-        @get:NotBlankOrNull
+        @field:NotBlankOrNull
         val name: String?,
-        @get:Email @get:NotBlank
-        val email: String
+        @field:Email @field:NotBlank
+        val email: String,
     )
 }

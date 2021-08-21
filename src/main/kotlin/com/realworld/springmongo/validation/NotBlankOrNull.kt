@@ -7,7 +7,7 @@ import javax.validation.ConstraintValidatorContext
 import javax.validation.Payload
 import kotlin.reflect.KClass
 
-@Target(AnnotationTarget.PROPERTY_GETTER)
+@Target(AnnotationTarget.FIELD)
 @Retention(AnnotationRetention.RUNTIME)
 @Constraint(validatedBy = [NotBlankOrNullValidator::class])
 annotation class NotBlankOrNull(

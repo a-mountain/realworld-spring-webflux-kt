@@ -1,5 +1,6 @@
 package com.realworld.springmongo.security
 
+import com.realworld.springmongo.user.UserTokenProvider
 import io.jsonwebtoken.Claims
 import io.jsonwebtoken.Jws
 import io.jsonwebtoken.Jwts
@@ -9,7 +10,7 @@ import org.springframework.stereotype.Component
 import java.util.*
 
 @Component
-class JwtSigner {
+class JwtSigner : UserTokenProvider {
 
     private val keyPair = Keys.keyPairFor(SignatureAlgorithm.RS256)
     private val jwtParser = Jwts.parserBuilder()
@@ -31,4 +32,6 @@ class JwtSigner {
     }
 
     private fun sessionTime(): Long = 86400 * 1000L
+
+    override fun getToken(userId: String): String = generateToken(userId)
 }
