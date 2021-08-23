@@ -8,14 +8,12 @@ data class UserView(
     val username: String,
     val bio: String?,
     val image: String?,
-) {
-    companion object {
-        fun fromUserAndToken(user: User, token: String) = UserView(
-            email = user.email,
-            token = token,
-            username = user.username,
-            bio = user.bio,
-            image = user.image,
-        )
-    }
-}
+)
+
+fun User.toUserView(token: String) = UserView(
+    email = this.email,
+    token = token,
+    username = this.username,
+    bio = this.bio,
+    image = this.image,
+)

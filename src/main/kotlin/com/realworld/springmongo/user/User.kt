@@ -20,12 +20,20 @@ class User(
     val favoriteArticlesIds: List<String>
         get() = _favoriteArticlesIds
 
-    fun follow(userId: String) {
-        _followingIds.add(userId)
+    fun follow(followerId: String) {
+        _followingIds.add(followerId)
+    }
+
+    fun follow(follower: User) {
+        follow(follower.id)
     }
 
     fun unfollow(userId: String) {
         _followingIds.remove(userId)
+    }
+
+    fun unfollow(user: User) {
+        unfollow(user.id)
     }
 
     fun isFollowing(user: User) = _followingIds.contains(user.id)

@@ -1,7 +1,7 @@
 package com.realworld.springmongo.api
 
 import com.realworld.springmongo.user.UserRepository
-import com.realworld.springmongo.user.dto.UserView
+import com.realworld.springmongo.user.dto.toUserView
 import helpers.UserApiSupport
 import helpers.UserSamples
 import org.assertj.core.api.Assertions.assertThat
@@ -73,6 +73,52 @@ class UserApiTest(
         assertThat(updatedUserView.image).isEqualTo(updateUserRequest.image)
 
         val savedUser = userRepository.findByEmail(updatedUserView.email).block()!!
-        assertThat(updatedUserView).isEqualTo(UserView.fromUserAndToken(savedUser, registeredUserView.token))
+        assertThat(updatedUserView).isEqualTo(savedUser.toUserView(registeredUserView.token))
+    }
+
+    @Test
+    fun `should return profile by name for unauthorized user`() {
+        val user = userApi.signup()
+
+        val profile = userApi.getProfile(user.username)
+
+        assertThat(profile.username).isEqualTo(user.username)
+        assertThat(profile.following).isFalse()
+    }
+
+    @Test
+    internal fun `should follow and return right profile`() {
+        val followingUserRequest = UserSamples.sampleUserRegistrationRequest()
+            .copy(email = "testemail2@gmail.com", username = "testname2")
+        val followingUser = userApi.signup(followingUserRequest)
+        val follower = userApi.signup()
+
+        val followedProfile = userApi.follow(followingUser.username, follower.token)
+
+        assertThat(followedProfile.username).isEqualTo(followingUser.username)
+        assertThat(followedProfile.following).isTrue()
+
+        val savedFollower = userRepository.findByUsername(follower.username).block()!!
+        val savedFollowingUser = userRepository.findByUsername(followingUser.username).block()!!
+        val following = savedFollower.isFollowing(savedFollowingUser)
+        assertThat(following).isTrue()
+    }
+
+    @Test
+    fun `should unfollow and return right profile`() {
+        val followingUserRequest = UserSamples.sampleUserRegistrationRequest()
+            .copy(email = "testemail2@gmail.com", username = "testname2")
+        val followingUser = userApi.signup(followingUserRequest)
+        val follower = userApi.signup()
+
+        val followedProfile = userApi.unfollow(followingUser.username, follower.token)
+
+        assertThat(followedProfile.username).isEqualTo(followingUser.username)
+        assertThat(followedProfile.following).isFalse()
+
+        val savedFollower = userRepository.findByUsername(follower.username).block()!!
+        val savedFollowingUser = userRepository.findByUsername(followingUser.username).block()!!
+        val following = savedFollower.isFollowing(savedFollowingUser)
+        assertThat(following).isFalse()
     }
 }

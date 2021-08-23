@@ -1,10 +1,7 @@
 package com.realworld.springmongo.user
 
 import com.realworld.springmongo.exceptions.InvalidRequestException
-import com.realworld.springmongo.user.dto.UpdateUserRequest
-import com.realworld.springmongo.user.dto.UserAuthenticationRequest
-import com.realworld.springmongo.user.dto.UserRegistrationRequest
-import com.realworld.springmongo.user.dto.UserView
+import com.realworld.springmongo.user.dto.*
 import kotlinx.coroutines.reactor.awaitSingle
 import org.springframework.stereotype.Component
 import java.util.*
@@ -40,14 +37,33 @@ class UserFacade(
     }
 
     suspend fun updateUser(request: UpdateUserRequest, userContext: UserContext): UserView {
-        val user = userContext.user
+        val (user, token) = userContext
         request.bio?.let { user.bio = it }
         request.image?.let { user.image = it }
         request.password?.let { user.encodedPassword = passwordService.encodePassword(it) }
         request.username?.let { updateUsername(user, it) }
         request.email?.let { updateEmail(user, it) }
         val savedUser = userRepository.save(user).awaitSingle()
-        return UserView.fromUserAndToken(savedUser, userContext.token)
+        return savedUser.toUserView(token)
+    }
+
+    suspend fun getProfile(username: String, viewer: User?): ProfileView {
+        val user = userRepository.findByUsernameOrError(username).awaitSingle()
+        return viewer?.let { user.toProfileViewForViewer(it) } ?: user.toUnfollowedProfileView()
+    }
+
+    suspend fun follow(username: String, futureFollower: User): ProfileView {
+        val userToFollow = userRepository.findByUsernameOrError(username).awaitSingle()
+        futureFollower.follow(userToFollow)
+        userRepository.save(futureFollower).awaitSingle()
+        return userToFollow.toFollowedProfileView()
+    }
+
+    suspend fun unfollow(username: String, follower: User): ProfileView {
+        val userToUnfollow = userRepository.findByUsernameOrError(username).awaitSingle()
+        follower.unfollow(userToUnfollow)
+        userRepository.save(follower).awaitSingle()
+        return userToUnfollow.toUnfollowedProfileView()
     }
 
     private suspend fun updateUsername(user: User, newUsername: String) {
@@ -72,9 +88,10 @@ class UserFacade(
 
     private fun createAuthenticationResponse(user: User): UserView {
         val token = userTokenProvider.getToken(user.id)
-        return UserView.fromUserAndToken(user, token)
+        return user.toUserView(token)
     }
 
     private fun usernameAlreadyInUseException() = InvalidRequestException("Username", "already in use")
+
     private fun emailAlreadyInUseException() = InvalidRequestException("Email", "already in use")
 }
