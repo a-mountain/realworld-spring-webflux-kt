@@ -87,16 +87,31 @@ class UserApiTest(
     }
 
     @Test
+    fun `should return profile by name for authorized user`() {
+        val followingUserRequest = UserSamples.sampleUserRegistrationRequest()
+            .copy(email = "testemail2@gmail.com", username = "testname2")
+        val followingUser = userApi.signup(followingUserRequest)
+        val follower = userApi.signup()
+
+        userApi.follow(followingUser.username, follower.token)
+
+        val followingProfile = userApi.getProfile(followingUser.username, follower.token)
+
+        assertThat(followingProfile.username).isEqualTo(followingUser.username)
+        assertThat(followingProfile.following).isTrue()
+    }
+
+    @Test
     internal fun `should follow and return right profile`() {
         val followingUserRequest = UserSamples.sampleUserRegistrationRequest()
             .copy(email = "testemail2@gmail.com", username = "testname2")
         val followingUser = userApi.signup(followingUserRequest)
         val follower = userApi.signup()
 
-        val followedProfile = userApi.follow(followingUser.username, follower.token)
+        val followingProfile = userApi.follow(followingUser.username, follower.token)
 
-        assertThat(followedProfile.username).isEqualTo(followingUser.username)
-        assertThat(followedProfile.following).isTrue()
+        assertThat(followingProfile.username).isEqualTo(followingUser.username)
+        assertThat(followingProfile.following).isTrue()
 
         val savedFollower = userRepository.findByUsername(follower.username).block()!!
         val savedFollowingUser = userRepository.findByUsername(followingUser.username).block()!!

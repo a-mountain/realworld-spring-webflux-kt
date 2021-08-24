@@ -7,19 +7,19 @@ import org.springframework.security.core.context.ReactiveSecurityContextHolder
 import org.springframework.stereotype.Component
 
 @Component
-class UserContextProvider(private val userRepository: UserRepository) {
+class UserSessionProvider(private val userRepository: UserRepository) {
 
     suspend fun getCurrentUser(): User? = getCurrentUserContext()?.user
 
-    suspend fun getCurrentUserContext(): UserContext? {
+    suspend fun getCurrentUserContext(): UserSession? {
         val context = ReactiveSecurityContextHolder.getContext().awaitSingleOrNull() ?: return null
         val tokenPrincipal = context.authentication.principal as TokenPrincipal
         val user = userRepository.findById(tokenPrincipal.userId).awaitSingle()
-        return UserContext(user, tokenPrincipal.token)
+        return UserSession(user, tokenPrincipal.token)
     }
 }
 
-data class UserContext(
+data class UserSession(
     val user: User,
     val token: String,
 )

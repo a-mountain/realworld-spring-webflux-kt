@@ -36,8 +36,8 @@ class UserFacade(
         return createAuthenticationResponse(user)
     }
 
-    suspend fun updateUser(request: UpdateUserRequest, userContext: UserContext): UserView {
-        val (user, token) = userContext
+    suspend fun updateUser(request: UpdateUserRequest, userSession: UserSession): UserView {
+        val (user, token) = userSession
         request.bio?.let { user.bio = it }
         request.image?.let { user.image = it }
         request.password?.let { user.encodedPassword = passwordService.encodePassword(it) }
@@ -49,7 +49,7 @@ class UserFacade(
 
     suspend fun getProfile(username: String, viewer: User?): ProfileView {
         val user = userRepository.findByUsernameOrError(username).awaitSingle()
-        return viewer?.let { user.toProfileViewForViewer(it) } ?: user.toUnfollowedProfileView()
+        return viewer?.let(user::toProfileViewForViewer) ?: user.toUnfollowedProfileView()
     }
 
     suspend fun follow(username: String, futureFollower: User): ProfileView {

@@ -1,6 +1,6 @@
 package com.realworld.springmongo.api
 
-import com.realworld.springmongo.user.UserContextProvider
+import com.realworld.springmongo.user.UserSessionProvider
 import com.realworld.springmongo.user.UserFacade
 import com.realworld.springmongo.user.dto.*
 import org.springframework.http.HttpStatus
@@ -9,7 +9,7 @@ import javax.validation.Valid
 
 @RestController
 @RequestMapping("/api")
-class UserController(private val userFacade: UserFacade, private val userContextProvider: UserContextProvider) {
+class UserController(private val userFacade: UserFacade, private val userSessionProvider: UserSessionProvider) {
 
     @PostMapping("/users")
     @ResponseStatus(HttpStatus.CREATED)
@@ -25,31 +25,31 @@ class UserController(private val userFacade: UserFacade, private val userContext
 
     @GetMapping("/user")
     suspend fun getCurrentUser(): UserWrapper<UserView> {
-        val (user, token) = userContextProvider.getCurrentUserContext()!!
+        val (user, token) = userSessionProvider.getCurrentUserContext()!!
         return user.toUserView(token).toUserWrapper()
     }
 
     @PutMapping("/user")
     suspend fun updateUser(@RequestBody @Valid request: UserWrapper<UpdateUserRequest>): UserWrapper<UserView> {
-        val userContext = userContextProvider.getCurrentUserContext()!!
+        val userContext = userSessionProvider.getCurrentUserContext()!!
         return userFacade.updateUser(request.content, userContext).toUserWrapper()
     }
 
     @GetMapping("/profiles/{username}")
     suspend fun getProfile(@PathVariable username: String): ProfileWrapper {
-        val currentUser = userContextProvider.getCurrentUser()
+        val currentUser = userSessionProvider.getCurrentUser()
         return userFacade.getProfile(username, currentUser).toProfileWrapper()
     }
 
     @PostMapping("/profiles/{username}/follow")
     suspend fun follow(@PathVariable username: String): ProfileWrapper {
-        val currentUser = userContextProvider.getCurrentUser()!!
+        val currentUser = userSessionProvider.getCurrentUser()!!
         return userFacade.follow(username, currentUser).toProfileWrapper()
     }
 
     @DeleteMapping("/profiles/{username}/follow")
     suspend fun unfollow(@PathVariable username: String): ProfileWrapper {
-        val currentUser = userContextProvider.getCurrentUser()!!
+        val currentUser = userSessionProvider.getCurrentUser()!!
         return userFacade.unfollow(username, currentUser).toProfileWrapper()
     }
 }
