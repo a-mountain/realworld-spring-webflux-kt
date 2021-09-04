@@ -1,9 +1,12 @@
 package com.realworld.springmongo.user
 
+import com.realworld.springmongo.article.Article
+import org.springframework.data.annotation.Id
 import org.springframework.data.mongodb.core.mapping.Document
 
 @Document
 class User(
+    @Id
     val id: String,
     var username: String,
     var encodedPassword: String,
@@ -36,9 +39,21 @@ class User(
         unfollow(user.id)
     }
 
+    fun favorite(article: Article) {
+        article.incrementFavoritesCount()
+        _favoriteArticlesIds.add(article.id)
+    }
+
+    fun unfavorite(article: Article) {
+        article.decrementFavoritesCount()
+        _favoriteArticlesIds.remove(article.id)
+    }
+
     fun isFollowing(user: User) = _followingIds.contains(user.id)
 
     fun isFollower(user: User) = user.isFollowing(this)
+
+    fun isFavoriteArticle(article: Article): Boolean = _favoriteArticlesIds.contains(article.id)
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true

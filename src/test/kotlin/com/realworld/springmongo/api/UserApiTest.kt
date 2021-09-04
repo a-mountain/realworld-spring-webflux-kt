@@ -102,7 +102,7 @@ class UserApiTest(
     }
 
     @Test
-    internal fun `should follow and return right profile`() {
+    fun `should follow and return right profile`() {
         val followingUserRequest = UserSamples.sampleUserRegistrationRequest()
             .copy(email = "testemail2@gmail.com", username = "testname2")
         val followingUser = userApi.signup(followingUserRequest)

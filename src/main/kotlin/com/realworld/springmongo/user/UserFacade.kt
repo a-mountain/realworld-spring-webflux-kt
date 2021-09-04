@@ -6,7 +6,6 @@ import kotlinx.coroutines.reactor.awaitSingle
 import org.springframework.stereotype.Component
 import java.util.*
 
-
 @Component
 class UserFacade(
     private val userRepository: UserRepository,
@@ -29,7 +28,7 @@ class UserFacade(
     }
 
     suspend fun login(request: UserAuthenticationRequest): UserView {
-        val user = userRepository.findByEmailOrError(request.email).awaitSingle()
+        val user = userRepository.findByEmailOrFail(request.email).awaitSingle()
         if (!passwordService.matches(rowPassword = request.password, encodedPassword = user.encodedPassword)) {
             throw InvalidRequestException("Password", "invalid")
         }
@@ -38,29 +37,33 @@ class UserFacade(
 
     suspend fun updateUser(request: UpdateUserRequest, userSession: UserSession): UserView {
         val (user, token) = userSession
+        updateUser(request, user)
+        val savedUser = userRepository.save(user).awaitSingle()
+        return savedUser.toUserView(token)
+    }
+
+    private suspend fun updateUser(request: UpdateUserRequest, user: User) {
         request.bio?.let { user.bio = it }
         request.image?.let { user.image = it }
         request.password?.let { user.encodedPassword = passwordService.encodePassword(it) }
         request.username?.let { updateUsername(user, it) }
         request.email?.let { updateEmail(user, it) }
-        val savedUser = userRepository.save(user).awaitSingle()
-        return savedUser.toUserView(token)
     }
 
     suspend fun getProfile(username: String, viewer: User?): ProfileView {
-        val user = userRepository.findByUsernameOrError(username).awaitSingle()
+        val user = userRepository.findByUsernameOrFail(username).awaitSingle()
         return viewer?.let(user::toProfileViewForViewer) ?: user.toUnfollowedProfileView()
     }
 
     suspend fun follow(username: String, futureFollower: User): ProfileView {
-        val userToFollow = userRepository.findByUsernameOrError(username).awaitSingle()
+        val userToFollow = userRepository.findByUsernameOrFail(username).awaitSingle()
         futureFollower.follow(userToFollow)
         userRepository.save(futureFollower).awaitSingle()
         return userToFollow.toFollowedProfileView()
     }
 
     suspend fun unfollow(username: String, follower: User): ProfileView {
-        val userToUnfollow = userRepository.findByUsernameOrError(username).awaitSingle()
+        val userToUnfollow = userRepository.findByUsernameOrFail(username).awaitSingle()
         follower.unfollow(userToUnfollow)
         userRepository.save(follower).awaitSingle()
         return userToUnfollow.toUnfollowedProfileView()
