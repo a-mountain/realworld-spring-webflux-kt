@@ -1,4 +1,4 @@
-package com.realworld.springmongo.article.repository
+package com.realworld.springmongo.lib
 
 import org.springframework.data.domain.Pageable
 import org.springframework.data.domain.Sort

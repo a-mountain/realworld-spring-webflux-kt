@@ -3,25 +3,23 @@ package com.realworld.springmongo.user
 import com.realworld.springmongo.article.Article
 import org.springframework.data.annotation.Id
 import org.springframework.data.mongodb.core.mapping.Document
+import org.springframework.data.mongodb.core.mapping.Field
 
 @Document
 class User(
-    @Id
-    val id: String,
+    @Id val id: String,
     var username: String,
     var encodedPassword: String,
     var email: String,
     var bio: String? = null,
     var image: String? = null,
-    private val _followingIds: MutableList<String> = ArrayList(),
-    private val _favoriteArticlesIds: MutableList<String> = ArrayList(),
+    @Field("followingIds") private val _followingIds: MutableList<String> = ArrayList(),
+    @Field("favoriteArticlesIds") private val _favoriteArticlesIds: MutableList<String> = ArrayList(),
 ) {
 
-    val followingIds: MutableList<String>
-        get() = _followingIds
+    val followingIds: MutableList<String> get() = _followingIds
 
-    val favoriteArticlesIds: List<String>
-        get() = _favoriteArticlesIds
+    val favoriteArticlesIds: List<String> get() = _favoriteArticlesIds
 
     fun follow(followerId: String) {
         _followingIds.add(followerId)

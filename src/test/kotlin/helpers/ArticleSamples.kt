@@ -1,6 +1,8 @@
 package helpers
 
+import com.realworld.springmongo.article.Article
 import com.realworld.springmongo.article.dto.CreateArticleRequest
+import java.time.Instant
 import java.util.*
 
 object ArticleSamples {
@@ -17,8 +19,17 @@ object ArticleSamples {
         tagList = DEFAULT_TAG_LIST,
     )
 
-    fun sampleArticle() = sampleCreateArticleRequest().toArticle(
-        id = UUID.randomUUID().toString(),
+    fun sampleArticle(
+        id: String = UUID.randomUUID().toString(),
+        createdAt: Instant,
+        updatedAt: Instant,
+    ) = Article(
+        id = id,
+        body = DEFAULT_ARTICLE_BODY,
+        description = DEFAULT_ARTICLE_DESCRIPTION,
+        title = DEFAULT_ARTICLE_TITLE,
+        createdAt = createdAt,
+        updatedAt = updatedAt,
         authorId = UserSamples.SAMPLE_USER_ID
     )
 }

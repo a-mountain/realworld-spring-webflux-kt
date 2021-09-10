@@ -1,5 +1,6 @@
 package com.realworld.springmongo.user
 
+import com.realworld.springmongo.exceptions.InvalidRequestException
 import com.realworld.springmongo.security.TokenPrincipal
 import kotlinx.coroutines.reactor.awaitSingle
 import kotlinx.coroutines.reactor.awaitSingleOrNull
@@ -9,9 +10,14 @@ import org.springframework.stereotype.Component
 @Component
 class UserSessionProvider(private val userRepository: UserRepository) {
 
-    suspend fun getCurrentUser(): User? = getCurrentUserContext()?.user
+    suspend fun getCurrentUserOrNull(): User? = getCurrentUserSessionOrNull()?.user
 
-    suspend fun getCurrentUserContext(): UserSession? {
+    suspend fun getCurrentUserOrFail(): User = getCurrentUserSessionOrFail().user
+
+    suspend fun getCurrentUserSessionOrFail() =
+        getCurrentUserSessionOrNull() ?: throw InvalidRequestException("User", "current user is not login in")
+
+    suspend fun getCurrentUserSessionOrNull(): UserSession? {
         val context = ReactiveSecurityContextHolder.getContext().awaitSingleOrNull() ?: return null
         val tokenPrincipal = context.authentication.principal as TokenPrincipal
         val user = userRepository.findById(tokenPrincipal.userId).awaitSingle()
