@@ -106,7 +106,6 @@ interface PersonRepository : ReactiveMongoRepository<Person, String> {
 - First invocation of such method occurs exception.
 - IDEA shows it as suggestion when you write method in spring data repository.
 
-
 ```kotlin
 class Person(
     @Field("comments") private val _comments: MutableList<String> = ArrayList()
@@ -178,4 +177,14 @@ fun hello(@RequestParam name: String = "Maxim") = "Hello $name"
 // GOOD
 @GetMapping
 fun hello(@RequestParam(defaultValue = "Maxim") name: String) = "Hello $name"
+```
+
+### Validation annotations
+
+To make they work specify target as `field`.
+
+```kotlin
+data class CreateArticleRequest(
+    @field:NotBlank val title: String
+)
 ```
