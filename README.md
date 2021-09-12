@@ -61,23 +61,23 @@ structure, technologies and design approach.
 - (+) Comparing to Java Kotlin Coroutines incredibly simplify and reduce the amount of code. (1404 vs 1009 lines)
 - (-) Kotlin is not well supported by Spring as Java that entails some pitfalls and inconvenience.
 
-# Kotlin's pitfalls and features
+# Pitfalls and features
 
 ### Default methods don't work.
 
-- If your default method name match query pattern it will be replaced by default implementation.
-- If your default method name doesn't match query pattern QueryCreationException occurs.
+- If default method name matches query pattern it will be replaced by default implementation.
+- If default method name doesn't match query pattern QueryCreationException occurs.
 
 To fix this use Extension methods:
 
 ```kotlin
-// BAD
+// FAIL
 interface PersonRepository : ReactiveMongoRepository<Person, String> {
     fun findByName(firstName: String): Mono<Person>
     fun findByNameOrFail(firstName: String): Mono<Person> = findByName(firstName)...
 }
 
-// GOOD
+// OK
 interface PersonRepository : ReactiveMongoRepository<Person, String> {
     fun findByName(firstName: String): Mono<Person>
 }
@@ -85,17 +85,17 @@ interface PersonRepository : ReactiveMongoRepository<Person, String> {
 fun PersonRepository.findByNameOrFail(firstName: String): Mono<Person> = findByName(firstName)...
 ```
 
-### Suspend modifier doesn't work
+### Suspend modifier isn`t supported
 
 You still need to use Mono or Flux as return type.
 
 ```kotlin
-// BAD
+// FAIL
 interface PersonRepository : ReactiveMongoRepository<Person, String> {
     suspend fun findByName(firstName: String): Person
 }
 
-// GOOD
+// OK
 interface PersonRepository : ReactiveMongoRepository<Person, String> {
     fun findByName(firstName: String): Mono<Person>
 }
@@ -103,7 +103,9 @@ interface PersonRepository : ReactiveMongoRepository<Person, String> {
 
 ### Property without backing field is not persisted in MongoDB
 
-IDEA still show it as suggestion when you write method in spring data repository.
+- First invocation of such method occurs exception.
+- IDEA shows it as suggestion when you write method in spring data repository.
+
 
 ```kotlin
 class Person(
@@ -159,9 +161,7 @@ fun <T, V> getFieldNameFromFieldAnnotation(property: KProperty1<T, V>): String? 
     }
 }
 
-// GOOD
 fun f() {
-    // Spring method doesn't account for @Field annotation
     whereProperty(Person::fullName)... // `full_name`
 }
 ```
