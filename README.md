@@ -181,7 +181,7 @@ fun hello(@RequestParam(defaultValue = "Maxim") name: String) = "Hello $name"
 
 ### Validation annotations
 
-To make they work specify target as `field`.
+To make them work specify target as `field`.
 
 ```kotlin
 data class CreateArticleRequest(
