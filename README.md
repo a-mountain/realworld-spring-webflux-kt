@@ -50,7 +50,7 @@ You need Java 16 installed.
 
 It's [Java Version](https://github.com/a-mountain/realworld-spring-webflux) of RealWorld Implementation with same structure, technologies and design approach.  
 
-- (+) Comparing to Java Kotlin Coroutines incredibly simplify and reduce the amount of code.
+- (+) Comparing to Java Kotlin Coroutines incredibly simplify and reduce the amount of code. (1409 vs 1009 lines)
 - (-) Kotlin is not well supported by Spring as Java that entails some pitfalls and inconvenience.  
 
 ## Pitfalls
