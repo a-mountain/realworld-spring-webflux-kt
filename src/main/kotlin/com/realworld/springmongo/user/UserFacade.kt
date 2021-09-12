@@ -50,10 +50,10 @@ class UserFacade(
         request.email?.let { updateEmail(user, it) }
     }
 
-    suspend fun getProfile(username: String, viewer: User?): ProfileView {
-        val user = userRepository.findByUsernameOrFail(username).awaitSingle()
-        return viewer?.let(user::toProfileViewForViewer) ?: user.toUnfollowedProfileView()
-    }
+    suspend fun getProfile(username: String, viewer: User?): ProfileView = userRepository
+        .findByUsernameOrFail(username)
+        .awaitSingle()
+        .toProfileView(viewer)
 
     suspend fun follow(username: String, futureFollower: User): ProfileView {
         val userToFollow = userRepository.findByUsernameOrFail(username).awaitSingle()

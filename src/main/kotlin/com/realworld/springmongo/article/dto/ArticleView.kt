@@ -4,7 +4,7 @@ import com.realworld.springmongo.article.Article
 import com.realworld.springmongo.user.User
 import com.realworld.springmongo.user.dto.ProfileView
 import com.realworld.springmongo.user.dto.toOwnProfileView
-import com.realworld.springmongo.user.dto.toProfileViewForViewer
+import com.realworld.springmongo.user.dto.toProfileView
 import java.time.Instant
 
 data class ArticleView(
@@ -51,13 +51,20 @@ data class ArticleView(
     }
 }
 
-fun Article.toArticleViewForViewer(author: ProfileView, viewer: User) =
-    toArticleView(author, favorited = viewer.isFavoriteArticle(this))
+fun Article.toArticleView(author: ProfileView, viewer: User? = null) = when (viewer) {
+    null -> toUnfavoredArticleView(author)
+    else -> toArticleViewForViewer(author, viewer)
+}
 
-fun Article.toArticleViewForViewer(author: User, viewer: User) =
-    toArticleView(author = author.toProfileViewForViewer(viewer), favorited = viewer.isFavoriteArticle(this))
+fun Article.toArticleView(author: User, viewer: User? = null) = when (viewer) {
+    null -> toUnfavoredArticleView(author.toProfileView(viewer))
+    else -> toArticleViewForViewer(author.toProfileView(viewer), viewer)
+}
 
 fun Article.toUnfavoredArticleView(author: ProfileView) = toArticleView(author, favorited = false)
+
+private fun Article.toArticleViewForViewer(author: ProfileView, viewer: User) =
+    toArticleView(author, favorited = viewer.isFavoriteArticle(this))
 
 fun Article.toAuthorArticleView(author: User) =
     toArticleViewForViewer(author.toOwnProfileView(), viewer = author)

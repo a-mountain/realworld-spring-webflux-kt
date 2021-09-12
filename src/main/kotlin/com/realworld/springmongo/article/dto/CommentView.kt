@@ -1,7 +1,9 @@
 package com.realworld.springmongo.article.dto
 
 import com.realworld.springmongo.article.Comment
+import com.realworld.springmongo.user.User
 import com.realworld.springmongo.user.dto.ProfileView
+import com.realworld.springmongo.user.dto.toProfileView
 import java.time.Instant
 
 data class CommentView(
@@ -31,6 +33,14 @@ data class CommentView(
         return result
     }
 }
+
+fun Comment.toCommentView(author: User, viewer: User? = null) = CommentView(
+    id = this.id,
+    createdAt = this.createdAt,
+    updatedAt = this.updatedAt,
+    body = this.body,
+    author = author.toProfileView(viewer)
+)
 
 fun Comment.toCommentView(author: ProfileView) = CommentView(
     id = this.id,

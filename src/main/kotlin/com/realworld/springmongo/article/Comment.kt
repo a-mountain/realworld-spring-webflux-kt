@@ -1,7 +1,6 @@
 package com.realworld.springmongo.article
 
 import com.realworld.springmongo.user.User
-import org.springframework.data.annotation.CreatedDate
 import org.springframework.data.annotation.LastModifiedDate
 import java.time.Instant
 
@@ -9,11 +8,13 @@ class Comment(
     val id: String,
     var body: String,
     var authorId: String,
-    @CreatedDate
     val createdAt: Instant = Instant.now(),
-    @LastModifiedDate
-    var updatedAt: Instant = Instant.now(),
+    updatedAt: Instant = Instant.now(),
 ) {
+
+    @LastModifiedDate
+    var updatedAt: Instant = updatedAt
+        private set
 
     fun isAuthor(user: User) = authorId == user.id
 

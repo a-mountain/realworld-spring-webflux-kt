@@ -1,7 +1,6 @@
 package com.realworld.springmongo.api
 
 import com.fasterxml.jackson.annotation.JsonProperty
-import com.realworld.springmongo.article.Comment
 import com.realworld.springmongo.user.dto.ProfileView
 
 data class UserWrapper<T>(@JsonProperty("user") val content: T)

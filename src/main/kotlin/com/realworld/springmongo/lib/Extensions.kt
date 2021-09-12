@@ -1,6 +1,5 @@
 package com.realworld.springmongo.lib
 
-import org.slf4j.LoggerFactory
 import org.springframework.data.domain.Sort
 import org.springframework.data.mongodb.core.mapping.Field
 import org.springframework.data.mongodb.core.query.Criteria

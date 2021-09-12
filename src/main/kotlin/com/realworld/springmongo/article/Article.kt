@@ -1,7 +1,6 @@
 package com.realworld.springmongo.article
 
 import com.realworld.springmongo.user.User
-import org.springframework.data.annotation.CreatedDate
 import org.springframework.data.annotation.Id
 import org.springframework.data.annotation.LastModifiedDate
 import org.springframework.data.mongodb.core.mapping.Document
@@ -13,14 +12,18 @@ class Article(
     title: String,
     favoritesCount: Int = 0,
     @Id val id: String,
-    @CreatedDate val createdAt: Instant = Instant.now(),
-    @LastModifiedDate var updatedAt: Instant = Instant.now(),
+    val createdAt: Instant = Instant.now(),
+    updatedAt: Instant = Instant.now(),
     var description: String,
     var body: String,
     var authorId: String,
     @Field("comments") private val _comments: MutableList<Comment> = ArrayList(),
     @Field("tags") private val _tags: MutableList<String> = ArrayList(),
 ) {
+
+    @LastModifiedDate
+    var updatedAt: Instant = updatedAt
+        private set
 
     var favoritesCount: Int = favoritesCount
         private set

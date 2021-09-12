@@ -6,8 +6,6 @@ import com.realworld.springmongo.exceptions.InvalidRequestException
 import com.realworld.springmongo.user.User
 import com.realworld.springmongo.user.UserRepository
 import com.realworld.springmongo.user.dto.toOwnProfileView
-import com.realworld.springmongo.user.dto.toProfileViewForViewer
-import com.realworld.springmongo.user.dto.toUnfollowedProfileView
 import com.realworld.springmongo.user.findAuthorByArticle
 import kotlinx.coroutines.flow.asFlow
 import kotlinx.coroutines.flow.map
@@ -25,20 +23,19 @@ class ArticleFacade(
     private val userRepository: UserRepository,
 ) {
 
-
     suspend fun createArticle(request: CreateArticleRequest, author: User): ArticleView {
         val id = UUID.randomUUID().toString()
         val newArticle = request.toArticle(id, author.id)
         val savedArticle = articleRepository.save(newArticle).awaitSingle()
         tagRepository.saveAllTags(savedArticle.tags).awaitSingle()
         val authorProfileView = author.toOwnProfileView()
-        return savedArticle.toUnfavoredArticleView(authorProfileView)
+        return savedArticle.toArticleView(authorProfileView, author)
     }
 
     suspend fun getArticle(slug: String, currentUser: User?): ArticleView {
         val article = articleRepository.findBySlugOrFail(slug).awaitSingle()
         val author = userRepository.findAuthorByArticle(article).awaitSingle()
-        return mapToArticleView(author, article, currentUser)
+        return article.toArticleView(author, currentUser)
     }
 
     suspend fun updateArticle(request: UpdateArticleRequest, slug: String, author: User): ArticleView {
@@ -95,12 +92,7 @@ class ArticleFacade(
 
     private suspend fun mapToArticleView(article: Article, viewer: User?): ArticleView {
         val author = userRepository.findAuthorByArticle(article).awaitSingle()!!
-        return mapToArticleView(author, article, viewer)
-    }
-
-    private fun mapToArticleView(author: User, article: Article, viewer: User?): ArticleView = when (viewer) {
-        null -> article.toUnfavoredArticleView(author.toUnfollowedProfileView())
-        else -> article.toArticleViewForViewer(author, viewer)
+        return article.toArticleView(author, viewer)
     }
 
     suspend fun favoriteArticle(slug: String, currentUser: User): ArticleView {
@@ -140,15 +132,18 @@ class ArticleFacade(
         articleRepository.save(article).awaitSingle()
     }
 
+    private suspend fun mapToCommentView(comment: Comment, viewer: User?): CommentView {
+        val commentAuthor = userRepository
+            .findById(comment.authorId)
+            .awaitSingle()
+        return comment.toCommentView(commentAuthor, viewer)
+    }
+
     suspend fun getComments(slug: String, viewer: User?): MultipleCommentsView {
         val article = articleRepository.findBySlugOrFail(slug).awaitSingle()
-        return article.comments.asFlow().map { comment ->
-            val commentAuthor = userRepository.findById(comment.authorId).awaitSingle()
-            viewer?.let { comment.toCommentView(commentAuthor.toProfileViewForViewer(viewer)) }
-                ?: comment.toCommentView(commentAuthor.toUnfollowedProfileView())
-        }
+        return article.comments.asFlow()
+            .map { mapToCommentView(it, viewer) }
             .toList()
             .toMultipleCommentsView()
     }
-
 }
