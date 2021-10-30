@@ -32,16 +32,16 @@ class ArticleManualRepositoryImpl(private val mongoTemplate: ReactiveMongoTempla
             .limit(limit)
             .with(ArticleRepository.NEWEST_ARTICLE_SORT)
 
-        favoritedBy?.let { query.addCriteria(authorIdEquals(it)) }
         tag?.let { query.addCriteria(tagsContains(it)) }
-        authorId?.let { query.addCriteria(isFavoriteArticleByUser(it)) }
+        authorId?.let { query.addCriteria(authorIdEquals(it)) }
+        favoritedBy?.let { query.addCriteria(isFavoriteArticleByUser(it)) }
 
         return mongoTemplate.find(query)
     }
 
-    private fun isFavoriteArticleByUser(it: String) = whereProperty(Article::authorId).`is`(it)
-
     private fun tagsContains(it: String) = whereProperty(Article::tags).all(it)
 
-    private fun authorIdEquals(it: User) = whereProperty(Article::id).`in`(it.favoriteArticlesIds)
+    private fun authorIdEquals(it: String) = whereProperty(Article::authorId).`is`(it)
+
+    private fun isFavoriteArticleByUser(it: User) = whereProperty(Article::id).`in`(it.favoriteArticlesIds)
 }
